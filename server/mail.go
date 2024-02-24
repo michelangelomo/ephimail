@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/emersion/go-smtp"
+	"github.com/michelangelomo/ephimail/internal/redis"
 	"github.com/urfave/cli/v2"
 )
 
@@ -16,6 +17,8 @@ type MailServer struct {
 	Address        string
 	Port           int
 	AllowedDomains cli.StringSlice
+
+	RedisClient *redis.Client
 }
 
 func NewMailServer() *MailServer {
@@ -24,7 +27,8 @@ func NewMailServer() *MailServer {
 
 func (m *MailServer) Run() {
 	b := &Backend{
-		Allowed: m.isAllowed,
+		Allowed:     m.isAllowed,
+		RedisClient: m.RedisClient,
 	}
 
 	s := smtp.NewServer(b)
@@ -61,7 +65,8 @@ func (m MailServer) isAllowed(rcpt string) error {
 
 // The Backend implements SMTP server methods.
 type Backend struct {
-	Allowed func(string) error
+	Allowed     func(string) error
+	RedisClient *redis.Client
 }
 
 // A Session is returned after successful login.
@@ -101,17 +106,17 @@ func (s *Session) Data(r io.Reader) error {
 		log.Fatal(err)
 	}
 
-	header := m.Header
-	fmt.Println("Date:", header.Get("Date"))
-	fmt.Println("From:", header.Get("From"))
-	fmt.Println("To:", header.Get("To"))
-	fmt.Println("Subject:", header.Get("Subject"))
+	// header := m.Header
+	// fmt.Println("Date:", header.Get("Date"))
+	// fmt.Println("From:", header.Get("From"))
+	// fmt.Println("To:", header.Get("To"))
+	// fmt.Println("Subject:", header.Get("Subject"))
 
-	// body, err := io.ReadAll(m.Body)
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// fmt.Printf("%s", body)
+	body, err := io.ReadAll(m.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	s.Backend.RedisClient.AddEmail(s.Recipient, string(body))
 	return nil
 }
 

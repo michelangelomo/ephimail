@@ -1,0 +1,395 @@
+/* NeoBrutalism.css - Custom Neo-Brutalist styling for ephimail */
+
+:root {
+    /* Color palette - not too blinding */
+    --primary: #f87171; /* Soft red */
+    --primary-dark: #dc2626;
+    --secondary: #3b82f6; /* Blue */
+    --secondary-dark: #1d4ed8;
+    --background: #f9fafb; /* Off-white */
+    --text: #1f2937; /* Dark gray */
+    --text-light: #6b7280; /* Medium gray */
+    --accent: #fbbf24; /* Yellow */
+    --accent-dark: #d97706;
+    --success: #34d399; /* Green */
+    --success-dark: #10b981;
+    --danger: #ef4444; /* Red */
+    --danger-dark: #b91c1c;
+    --neutral: #d1d5db; /* Light gray */
+    --neutral-dark: #9ca3af;
+    --card-bg: #ffffff;
+    --shadow-color: rgba(0, 0, 0, 0.25);
+  }
+  
+  /* General styling */
+  body {
+    background-color: var(--background) !important;
+    font-family: 'Space Grotesk', 'Helvetica Neue', sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+  }
+  
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    letter-spacing: -0.025em;
+  }
+  
+  .display-5 {
+    font-size: 2.5rem !important;
+    letter-spacing: -0.03em;
+  }
+  
+  /* Neo-Brutalist Card */
+  .neo-card {
+    background-color: var(--card-bg);
+    border: 3px solid var(--text);
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 6px 6px 0 var(--shadow-color);
+    margin-bottom: 2rem;
+  }
+  
+  .neo-card-header {
+    padding: 1rem 1.5rem;
+    background-color: var(--primary);
+    color: white;
+    font-weight: bold;
+    margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+    border-bottom: 3px solid var(--text);
+    border-radius: 5px 5px 0 0;
+  }
+  
+  .neo-card-success .neo-card-header {
+    background-color: var(--success);
+  }
+  
+  .neo-card-danger .neo-card-header {
+    background-color: var(--danger);
+  }
+  
+  /* Buttons */
+  .neo-btn {
+    background-color: var(--card-bg);
+    color: var(--text);
+    border: 3px solid var(--text);
+    border-radius: 8px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--shadow-color);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .neo-btn:active {
+    box-shadow: 2px 2px 0 var(--shadow-color);
+  }
+  
+  .neo-btn:focus {
+    outline: none;
+  }
+  
+  .neo-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Button variants */
+  .neo-btn-primary {
+    background-color: var(--primary);
+    color: white;
+  }
+  
+  .neo-btn-secondary {
+    background-color: var(--secondary);
+    color: white;
+  }
+  
+  .neo-btn-success {
+    background-color: var(--success);
+    color: white;
+  }
+  
+  .neo-btn-danger {
+    background-color: var(--danger);
+    color: white;
+  }
+  
+  /* Form elements */
+  .neo-input {
+    border: 3px solid var(--text);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    font-size: 1rem;
+    background-color: white;
+    box-shadow: 4px 4px 0 var(--shadow-color);
+  }
+  
+  .neo-input:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  .neo-select {
+    border: 3px solid var(--text);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    font-size: 1rem;
+    background-color: white;
+    box-shadow: 4px 4px 0 var(--shadow-color);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231f2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+  }
+  
+  .neo-select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+  
+  /* Custom input group styles */
+  .neo-input-group {
+    display: flex;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .neo-input-group > * {
+    border-radius: 0;
+  }
+  
+  .neo-input-group > *:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+  }
+  
+  .neo-input-group > *:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+  }
+  
+  .neo-input-group-text {
+    padding: 0.75rem 1rem;
+    background-color: var(--neutral);
+    border: 3px solid var(--text);
+    border-left: 0;
+    font-weight: bold;
+  }
+  
+  /* Email list styling */
+  .email-list-wrapper {
+    background-color: var(--card-bg) !important;
+    box-shadow: 6px 6px 0 var(--shadow-color);
+  }
+  
+  .emails {
+    border: none !important;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .email {
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s ease;
+    border-radius: 6px !important;
+    border: 2px solid transparent !important;
+  }
+  
+  .email-active {
+    background-color: var(--neutral) !important;
+    border: 2px solid var(--text) !important;
+    transform: translateX(-2px) translateY(-2px);
+    box-shadow: 4px 4px 0 var(--shadow-color);
+  }
+  
+  .email:hover:not(.email-active) {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    cursor: pointer;
+  }
+  
+  /* Email content area */
+  .email-content {
+    background-color: var(--card-bg);
+    border: 3px solid var(--text);
+    border-radius: 8px;
+    padding: 1.5rem;
+    min-height: 400px;
+    box-shadow: 6px 6px 0 var(--shadow-color);
+  }
+  
+  /* Alert customization */
+  .neo-alert {
+    border: 3px solid var(--text);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: var(--neutral);
+    box-shadow: 4px 4px 0 var(--shadow-color);
+  }
+  
+  .neo-alert-info {
+    background-color: var(--secondary);
+    color: white;
+  }
+  
+  .neo-alert-success {
+    background-color: var(--success);
+    color: white;
+  }
+  
+  .neo-alert-warning {
+    background-color: var(--accent);
+    color: var(--text);
+  }
+  
+  .neo-alert-danger {
+    background-color: var(--danger);
+    color: white;
+  }
+  
+  /* Badge styling */
+  .neo-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 2px solid var(--text);
+    border-radius: 4px;
+    background-color: var(--neutral);
+    margin-left: 0.5rem;
+    box-shadow: 2px 2px 0 var(--shadow-color);
+  }
+  
+  .neo-badge-success {
+    background-color: var(--success);
+    color: white;
+  }
+  
+  /* Spinner customization */
+  .neo-spinner {
+    width: 1.5rem;
+    height: 1.5rem;
+    border: 0.25rem solid rgba(0, 0, 0, 0.1);
+    border-right-color: var(--text);
+    border-radius: 50%;
+    animation: spinner 0.75s linear infinite;
+  }
+  
+  @keyframes spinner {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  
+  /* Logo area */
+  .logo-container {
+    position: relative;
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .logo-container::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 150px;
+    height: 5px;
+    background-color: var(--primary);
+  }
+  
+  /* Custom checkboxes */
+  .neo-checkbox {
+    position: relative;
+    padding-left: 2.5rem;
+    cursor: pointer;
+    display: block;
+    margin-bottom: 1rem;
+    font-weight: 600;
+  }
+  
+  .neo-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  
+  .neo-checkbox-mark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1.5rem;
+    width: 1.5rem;
+    background-color: white;
+    border: 3px solid var(--text);
+    border-radius: 4px;
+  }
+  
+  .neo-checkbox input:checked ~ .neo-checkbox-mark {
+    background-color: var(--primary);
+  }
+  
+  .neo-checkbox-mark:after {
+    content: "";
+    position: absolute;
+    display: none;
+  }
+  
+  .neo-checkbox input:checked ~ .neo-checkbox-mark:after {
+    display: block;
+  }
+  
+  .neo-checkbox .neo-checkbox-mark:after {
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+  
+  /* Placeholder styling */
+  .placeholder {
+    color: var(--text-light);
+    font-style: italic;
+  }
+  
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .neo-card {
+      padding: 1rem;
+    }
+    
+    .neo-card-header {
+      margin: -1rem -1rem 1rem -1rem;
+      padding: 0.75rem 1rem;
+    }
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: var(--neutral);
+    border-radius: 6px;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--text);
+    border-radius: 6px;
+    border: 3px solid var(--neutral);
+  }

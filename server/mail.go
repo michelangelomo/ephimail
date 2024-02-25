@@ -18,17 +18,19 @@ type MailServer struct {
 	Port           int
 	AllowedDomains cli.StringSlice
 
-	RedisClient *redis.Client
+	storage redis.Storage
 }
 
-func NewMailServer() *MailServer {
-	return &MailServer{}
+func NewMailServer(storage redis.Storage) *MailServer {
+	return &MailServer{
+		storage: storage,
+	}
 }
 
 func (m *MailServer) Run() {
 	b := &Backend{
-		Allowed:     m.isAllowed,
-		RedisClient: m.RedisClient,
+		allowed: m.isAllowed,
+		storage: m.storage,
 	}
 
 	s := smtp.NewServer(b)
@@ -65,8 +67,8 @@ func (m MailServer) isAllowed(rcpt string) error {
 
 // The Backend implements SMTP server methods.
 type Backend struct {
-	Allowed     func(string) error
-	RedisClient *redis.Client
+	allowed func(string) error
+	storage redis.Storage
 }
 
 // A Session is returned after successful login.
@@ -93,7 +95,7 @@ func (s *Session) Mail(from string, opts *smtp.MailOptions) error {
 
 func (s *Session) Rcpt(to string, opts *smtp.RcptOptions) error {
 	s.Recipient = to
-	if err := s.Backend.Allowed(s.Recipient); err != nil {
+	if err := s.Backend.allowed(s.Recipient); err != nil {
 		fmt.Printf("Recipient error: %v\n", err)
 		return err
 	}
@@ -103,20 +105,26 @@ func (s *Session) Rcpt(to string, opts *smtp.RcptOptions) error {
 func (s *Session) Data(r io.Reader) error {
 	m, err := mail.ReadMessage(r)
 	if err != nil {
-		log.Fatal(err)
+		return fmt.Errorf("can't decode mail")
 	}
 
-	// header := m.Header
-	// fmt.Println("Date:", header.Get("Date"))
-	// fmt.Println("From:", header.Get("From"))
-	// fmt.Println("To:", header.Get("To"))
-	// fmt.Println("Subject:", header.Get("Subject"))
+	header := m.Header
+	if header.Get("To") != s.Recipient {
+		return fmt.Errorf("recipient mismatch")
+	}
 
 	body, err := io.ReadAll(m.Body)
 	if err != nil {
 		log.Fatal(err)
 	}
-	s.Backend.RedisClient.AddEmail(s.Recipient, string(body))
+	// save on redis
+	err = s.Backend.storage.StoreEmail(
+		s.Recipient,
+		string(body),
+	)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+	}
 	return nil
 }
 

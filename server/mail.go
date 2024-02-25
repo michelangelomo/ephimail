@@ -42,7 +42,7 @@ func (m *MailServer) Run() {
 	s.MaxRecipients = 50
 	s.AllowInsecureAuth = true
 
-	log.Println("Starting server at", s.Addr)
+	log.Println("starting mail server at", s.Addr)
 	if err := s.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}

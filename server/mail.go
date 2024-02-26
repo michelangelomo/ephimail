@@ -106,18 +106,22 @@ func (s *Session) Rcpt(to string, opts *smtp.RcptOptions) error {
 func (s *Session) Data(r io.Reader) error {
 	b, err := io.ReadAll(r)
 	if err != nil {
+		fmt.Printf("can't decode email: %v\n", err)
 		return fmt.Errorf("can't decode mail")
 	}
 
-	m, err := mail.ReadMessage(bytes.NewReader(b))
+	_, err = mail.ReadMessage(bytes.NewReader(b))
 	if err != nil {
+		fmt.Printf("can't decode email: %v\n", err)
 		return fmt.Errorf("can't decode mail")
 	}
 
-	header := m.Header
-	if header.Get("To") != s.Recipient {
-		return fmt.Errorf("recipient mismatch")
-	}
+	// is this useful? `To` field in headers is usually formatted as NAME <EMAIL> so it will never match the recipient
+	// header := m.Header
+	// if header.Get("To") != s.Recipient {
+	// 	fmt.Printf("recipient mismatch %s - %s\n", header.Get("To"), s.Recipient)
+	// 	return fmt.Errorf("recipient mismatch")
+	// }
 
 	// save on redis
 	err = s.Backend.storage.StoreEmail(

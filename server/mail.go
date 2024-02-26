@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
@@ -103,7 +104,12 @@ func (s *Session) Rcpt(to string, opts *smtp.RcptOptions) error {
 }
 
 func (s *Session) Data(r io.Reader) error {
-	m, err := mail.ReadMessage(r)
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("can't decode mail")
+	}
+
+	m, err := mail.ReadMessage(bytes.NewReader(b))
 	if err != nil {
 		return fmt.Errorf("can't decode mail")
 	}
@@ -113,14 +119,10 @@ func (s *Session) Data(r io.Reader) error {
 		return fmt.Errorf("recipient mismatch")
 	}
 
-	body, err := io.ReadAll(m.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
 	// save on redis
 	err = s.Backend.storage.StoreEmail(
 		s.Recipient,
-		string(body),
+		string(b),
 	)
 	if err != nil {
 		fmt.Printf("Error: %v", err)

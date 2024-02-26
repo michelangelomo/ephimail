@@ -3,15 +3,19 @@
 IFS='' read -r -d '' DATA <<'EOF'
 EHLO localhost
 MAIL FROM:<root@nsa.gov>
-RCPT TO:<root@localhost>
+RCPT TO:<flawless-ad@chevuoida.me>
 DATA
 MIME-Version: 1.0
 From: Lo Zio <antani@example.com>
 Date: Sat, 24 Feb 2024 17:43:20 +0100
 Subject: Ciao
-To: root@localhost
+To: flawless-ad@chevuoida.me
 
-porcodio
+teeeeeeeeeeeest
+
+teeeeeeeeeeeest
+teeeeeeeeeeeestteeeeeeeeeeeestteeeeeeeeeeeest
+<script>alert(1)</script>
 .
 EOF
 

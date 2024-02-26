@@ -21,7 +21,7 @@ func main() {
 	// initialize mail
 	mail = server.NewMailServer(storage)
 	// initialize web
-	web = server.NewWebServer(storage)
+	web = server.NewWebServer(storage, []string{})
 
 	app := &cli.App{
 		Name:  "ephimail",
@@ -86,6 +86,7 @@ func main() {
 				mail.Run()
 			}()
 			// start web server
+			web.SetAllowedDomains(mail.AllowedDomains.Value())
 			wg.Add(1)
 			go func() {
 				defer wg.Done()

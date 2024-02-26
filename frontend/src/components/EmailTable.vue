@@ -86,7 +86,7 @@ export default {
       this.emailSelected = false;
       this.emailSelectedId = '';
       try {
-          const response = await fetch("http://localhost:8000/inbox/{email}".replace('{email}', this.passedEmail));
+          const response = await fetch(`${process.env.VUE_APP_BACKEND_URL}/inbox/${this.passedEmail}`);
           const data = await response.json();
           for(let d in data){
             let e = Email.parse(data[d])

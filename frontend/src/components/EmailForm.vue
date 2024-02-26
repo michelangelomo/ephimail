@@ -55,7 +55,7 @@ export default {
         },
         async fetchSelectOptions() {
             try {
-                const response = await fetch('http://localhost:8000/domains');
+                const response = await fetch(`${process.env.VUE_APP_BACKEND_URL}/domains`);
                 const data = await response.json();
                 this.options = data;
                 if(data.length > 0) {

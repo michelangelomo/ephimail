@@ -30,6 +30,8 @@ func (w *WebServer) SetAllowedDomains(domains []string) {
 
 func (w *WebServer) Run() error {
 	m := mux.NewRouter()
+
+	// Register API routes
 	m.HandleFunc("/domains", func(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("Access-Control-Allow-Origin", "*")
 		rw.WriteHeader(http.StatusOK)
@@ -50,6 +52,9 @@ func (w *WebServer) Run() error {
 		rw.WriteHeader(http.StatusOK)
 		json.NewEncoder(rw).Encode(emails)
 	})
+
+	// Register reservation handlers
+	w.RegisterReservationHandlers(m)
 
 	// Serve static files
 	staticPath := "./frontend/dist"

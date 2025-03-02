@@ -2,9 +2,6 @@ package redis
 
 import (
 	"fmt"
-	"time"
-
-	"github.com/michelangelomo/ephimail/internal"
 )
 
 type Storage interface {
@@ -12,22 +9,9 @@ type Storage interface {
 	RetrieveEmails(to string) (map[string]string, error)
 }
 
+// Override StoreEmail to use TTL
 func (r *RedisStorage) StoreEmail(to, body string) error {
-	key := fmt.Sprintf(
-		"%s:%s",
-		to,
-		internal.GenerateHash(
-			body,
-			time.Now().String(),
-		),
-	)
-
-	return r.Client.Set(
-		r.context,
-		key,
-		body,
-		0,
-	).Err()
+	return r.StoreEmailWithTTL(to, body)
 }
 
 func (r *RedisStorage) RetrieveEmails(to string) (map[string]string, error) {

@@ -1,9 +1,11 @@
+// cmd/main.go
 package main
 
 import (
 	"log"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/michelangelomo/ephimail/internal/redis"
 	"github.com/michelangelomo/ephimail/server"
@@ -11,17 +13,19 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-var mail *server.MailServer
 var storage *redis.RedisStorage
-var web *server.WebServer
+var mail *server.MailServerWithWebSocket
+var web *server.WebServerWithWebSocket
 
 func main() {
-	// initialize redis storage
+	// Initialize redis storage
 	storage = redis.NewStorage()
-	// initialize mail
-	mail = server.NewMailServer(storage)
-	// initialize web
-	web = server.NewWebServer(storage, []string{})
+
+	// Initialize web server with WebSocket support
+	web = server.NewWebServerWithWebSocket(storage, []string{})
+
+	// Initialize mail server with WebSocket support
+	mail = server.NewMailServerWithWebSocket(storage, web)
 
 	app := &cli.App{
 		Name:  "ephimail",
@@ -30,18 +34,21 @@ func main() {
 			&cli.StringFlag{
 				Name:        "redis-address",
 				Value:       "127.0.0.1",
+				EnvVars:     []string{"REDIS_ADDRESS"},
 				Category:    "Redis",
 				Destination: &storage.Address,
 			},
 			&cli.IntFlag{
 				Name:        "redis-port",
 				Value:       6379,
+				EnvVars:     []string{"REDIS_PORT"},
 				Category:    "Redis",
 				Destination: &storage.Port,
 			},
 			&cli.StringFlag{
 				Name:        "mail-address",
 				Value:       "127.0.0.1",
+				EnvVars:     []string{"MAIL_ADDRESS"},
 				Usage:       "Address where to listen to",
 				Category:    "Mail server",
 				Destination: &mail.Address,
@@ -49,6 +56,7 @@ func main() {
 			&cli.IntFlag{
 				Name:        "mail-port",
 				Value:       25,
+				EnvVars:     []string{"MAIL_PORT"},
 				Usage:       "Port where to bind to",
 				Category:    "Mail server",
 				Destination: &mail.Port,
@@ -56,13 +64,15 @@ func main() {
 			&cli.StringSliceFlag{
 				Name:        "allow-domain",
 				Required:    true,
-				Usage:       "Allowed recipient domains list",
+				EnvVars:     []string{"ALLOWED_DOMAINS"},
+				Usage:       "Allowed recipient domains list (comma-separated)",
 				Category:    "Mail server",
 				Destination: &mail.AllowedDomains,
 			},
 			&cli.StringFlag{
 				Name:        "web-address",
 				Value:       "127.0.0.1",
+				EnvVars:     []string{"WEB_ADDRESS"},
 				Usage:       "Address where to listen to",
 				Category:    "Web server",
 				Destination: &web.Address,
@@ -70,27 +80,54 @@ func main() {
 			&cli.IntFlag{
 				Name:        "web-port",
 				Value:       80,
+				EnvVars:     []string{"WEB_PORT"},
 				Usage:       "Port where to bind to",
 				Category:    "Web server",
 				Destination: &web.Port,
 			},
+			&cli.IntFlag{
+				Name:     "email-ttl",
+				Value:    24,
+				EnvVars:  []string{"EMAIL_TTL"},
+				Usage:    "Email time-to-live in hours (0 for no expiration)",
+				Category: "Storage",
+			},
+			&cli.IntFlag{
+				Name:     "max-reservation-days",
+				Value:    7,
+				EnvVars:  []string{"MAX_RESERVATION_DAYS"},
+				Usage:    "Maximum reservation time in days",
+				Category: "Web server",
+			},
 		},
-		Action: func(*cli.Context) error {
+		Action: func(c *cli.Context) error {
 			var wg sync.WaitGroup
-			// connect to redis
+
+			// Set email TTL if provided
+			if c.Int("email-ttl") > 0 {
+				storage.EmailTTL = time.Duration(c.Int("email-ttl")) * time.Hour
+			}
+
+			// Connect to redis
 			storage.Connect()
-			// start mail server
+
+			// Set allowed domains for web server
+			web.SetAllowedDomains(mail.AllowedDomains.Value())
+
+			// Start web server with WebSocket support
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				if err := web.Run(); err != nil {
+					log.Fatal(err)
+				}
+			}()
+
+			// Start mail server with WebSocket support
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
 				mail.Run()
-			}()
-			// start web server
-			web.SetAllowedDomains(mail.AllowedDomains.Value())
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				web.Run()
 			}()
 
 			wg.Wait()

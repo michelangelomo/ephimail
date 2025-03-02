@@ -1,5 +1,35 @@
+version: '3'
+
 services:
   redis:
     image: redis
     ports:
       - 6379:6379
+    networks:
+      - ephimail-network
+    
+  web:
+    build: .
+    ports:
+      - 8080:80  # Web interface
+      - 2525:25  # SMTP service
+    depends_on:
+      - redis
+    networks:
+      - ephimail-network
+    environment:
+      - REDIS_ADDRESS=redis
+      - REDIS_PORT=6379
+      - MAIL_ADDRESS=0.0.0.0
+      - MAIL_PORT=25
+      - WEB_ADDRESS=0.0.0.0
+      - WEB_PORT=80
+      - ALLOWED_DOMAINS=localhost.local,localhost
+      - EMAIL_TTL=24
+      - MAX_RESERVATION_DAYS=7
+      - TZ=UTC
+    # No need for command specification anymore, as environment variables will be used
+
+networks:
+  ephimail-network:
+    driver: bridge

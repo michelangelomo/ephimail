@@ -9,6 +9,13 @@
         <EmailForm @emailSubmitted="handleEmailSubmit"/>
       </div>
     </div>
+    
+    <!-- Mailbox Reservation Component (only shown when an email is selected) -->
+    <div v-if="email" class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+      <MailboxReservation :email="email" />
+    </div>
+    
+    <!-- Email Table -->
     <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
       <EmailTable :passedEmail="email"/>
     </div>
@@ -19,12 +26,14 @@
 // @ is an alias to /src
 import EmailForm from '@/components/EmailForm.vue'
 import EmailTable from '@/components/EmailTable.vue'
+import MailboxReservation from '@/components/MailboxReservation.vue'
 
 export default {
   name: 'HomeView',
   components: {
     EmailForm,
     EmailTable,
+    MailboxReservation
   },
   data() {
     return {

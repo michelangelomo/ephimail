@@ -1,6 +1,6 @@
 module github.com/michelangelomo/ephimail
 
-go 1.18
+go 1.24
 
 require (
 	github.com/emersion/go-smtp v0.20.2

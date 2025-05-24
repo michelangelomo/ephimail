@@ -1,29 +1,44 @@
 <template>
-  <div class="reservation-container mt-4">
-    <div v-if="!reserved" class="card">
-      <div class="card-header bg-primary text-white">
+  <div class="reservation-container">
+    <!-- Show this when no email is selected -->
+    <div v-if="!email" class="neo-card">
+      <div class="neo-card-header">
+        <h5 class="mb-0">Mailbox Features</h5>
+      </div>
+      <div class="card-body">
+        <p class="card-text">Select an email address to access these features:</p>
+        <ul>
+          <li>Reserve a mailbox for private use</li>
+          <li>Enable end-to-end encryption</li>
+          <li>Automatically delete old emails</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Original reservation form when email is selected -->
+    <div v-else-if="!reserved" class="neo-card">
+      <div class="neo-card-header">
         <h5 class="mb-0">Reserve this mailbox</h5>
       </div>
       <div class="card-body">
         <p class="card-text">Reserving this mailbox prevents others from accessing emails sent to it.</p>
         
         <div class="mb-3">
-          <label for="duration" class="form-label">Reservation Duration</label>
-          <select v-model="duration" id="duration" class="form-select">
+          <label for="duration" class="form-label fw-bold">Reservation Duration</label>
+          <select v-model="duration" id="duration" class="neo-select">
             <option value="1h">1 Hour</option>
             <option value="24h">1 Day</option>
             <option value="168h">1 Week</option>
           </select>
         </div>
         
-        <div class="form-check mb-3">
-          <input v-model="useEncryption" class="form-check-input" type="checkbox" id="encryption">
-          <label class="form-check-label" for="encryption">
-            Enable End-to-End Encryption
-          </label>
-        </div>
+        <label class="neo-checkbox">
+          <input v-model="useEncryption" type="checkbox" id="encryption">
+          <span class="neo-checkbox-mark"></span>
+          Enable End-to-End Encryption
+        </label>
         
-        <div v-if="useEncryption" class="alert alert-info" role="alert">
+        <div v-if="useEncryption" class="neo-alert neo-alert-info" role="alert">
           <h6><i class="fas fa-lock"></i> About End-to-End Encryption</h6>
           <p class="mb-0">
             When enabled, all emails will be encrypted with a key that only you have.
@@ -32,15 +47,16 @@
           </p>
         </div>
         
-        <button @click="reserveMailbox" class="btn btn-primary" :disabled="isLoading">
-          <span v-if="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <button @click="reserveMailbox" class="neo-btn neo-btn-primary" :disabled="isLoading">
+          <span v-if="isLoading" class="neo-spinner d-inline-block" role="status" aria-hidden="true"></span>
           {{ isLoading ? 'Processing...' : 'Reserve Mailbox' }}
         </button>
       </div>
     </div>
     
-    <div v-else class="card">
-      <div class="card-header bg-success text-white">
+    <!-- Reserved mailbox info -->
+    <div v-else class="neo-card neo-card-success">
+      <div class="neo-card-header">
         <h5 class="mb-0">Mailbox Reserved</h5>
       </div>
       <div class="card-body">
@@ -48,12 +64,12 @@
           This mailbox is reserved until <strong>{{ formatDate(expiresAt) }}</strong>
         </p>
         
-        <div v-if="encrypted" class="alert alert-warning">
+        <div v-if="encrypted" class="neo-alert neo-alert-warning">
           <h6><i class="fas fa-exclamation-triangle"></i> Important Security Information</h6>
           <p>This mailbox uses end-to-end encryption. Your unique access URL is:</p>
-          <div class="input-group mb-3">
-            <input type="text" class="form-control" :value="reservationUrl" readonly>
-            <button class="btn btn-outline-secondary" type="button" @click="copyUrl">
+          <div class="neo-input-group mb-3">
+            <input type="text" class="neo-input" :value="reservationUrl" readonly>
+            <button class="neo-btn" type="button" @click="copyUrl">
               <i class="fas fa-copy"></i> Copy
             </button>
           </div>
@@ -63,7 +79,7 @@
           </p>
         </div>
         
-        <button @click="releaseReservation" class="btn btn-danger">
+        <button @click="releaseReservation" class="neo-btn neo-btn-danger mt-3">
           Release Reservation
         </button>
       </div>
@@ -254,7 +270,16 @@ export default {
 
 <style scoped>
 .reservation-container {
-  max-width: 800px;
   margin: 0 auto;
+  height: 100%;
+}
+
+.neo-alert-warning {
+  background-color: var(--accent);
+  box-shadow: 6px 6px 0 var(--shadow-color);
+}
+
+.neo-card {
+  height: 100%;
 }
 </style>

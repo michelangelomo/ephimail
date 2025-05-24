@@ -6,7 +6,7 @@ require (
 	github.com/emersion/go-smtp v0.20.2
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/websocket v1.5.3
-	github.com/redis/go-redis/v9 v9.5.1
+	github.com/redis/go-redis/v9 v9.5.5
 	github.com/urfave/cli/v2 v2.27.1
 )
 

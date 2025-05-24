@@ -186,8 +186,6 @@
   /* Email list styling */
   .email-list-wrapper {
     background-color: var(--card-bg) !important;
-    border: 3px solid var(--text);
-    border-radius: 8px;
     box-shadow: 6px 6px 0 var(--shadow-color);
   }
   

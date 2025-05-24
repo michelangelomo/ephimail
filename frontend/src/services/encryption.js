@@ -1,4 +1,3 @@
-
 export default class EncryptionService {
     /**
      * Generate a new RSA key pair for email encryption
@@ -113,24 +112,64 @@ export default class EncryptionService {
     }
   
     /**
-     * Extracts the private key from URL fragment
+     * Extracts the private key from URL
      * @returns {string|null} The private key or null if not found
      */
     static getPrivateKeyFromUrl() {
-      // Get private key from URL fragment
-      const fragment = window.location.hash.substring(1);
-      if (fragment && fragment.length > 0) {
-        return fragment;
-      }
-      return null;
+      const url = new URL(window.location);
+      const urlParams = new URLSearchParams(url.hash.substring(1).split('?')[1] || '');
+      return urlParams.get('key') || null;
     }
   
     /**
-     * Sets the private key in the URL fragment
+     * Sets the private key in the URL while preserving the inbox path
      * @param {string} privateKey - The private key to set
+     * @param {string} email - The email address for the inbox
      */
-    static setPrivateKeyInUrl(privateKey) {
-      window.location.hash = privateKey;
+    static setPrivateKeyInUrl(privateKey, email) {
+      const url = new URL(window.location);
+      const newHash = `/${email}?key=${encodeURIComponent(privateKey)}`;
+      
+      // Update the URL without triggering a page reload
+      history.replaceState(null, '', `${url.origin}${url.pathname}${url.search}#${newHash}`);
+    }
+
+    /**
+     * Gets the current inbox email from URL
+     * @returns {string|null} The email address or null if not found
+     */
+    static getEmailFromUrl() {
+      const hashLocation = window.location.hash;
+      if (!hashLocation) return null;
+      
+      const path = hashLocation.substring(1);
+      const emailPart = path.split('?')[0]; // Remove query parameters
+      const extractedPath = emailPart.replace("/", "");
+      
+      // Basic email validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (emailRegex.test(extractedPath)) {
+        return extractedPath;
+      }
+      
+      return null;
+    }
+
+    /**
+     * Updates URL with email and optionally private key
+     * @param {string} email - The email address
+     * @param {string|null} privateKey - Optional private key
+     */
+    static updateUrlWithEmail(email, privateKey = null) {
+      const url = new URL(window.location);
+      let newHash = `/${email}`;
+      
+      if (privateKey) {
+        newHash += `?key=${encodeURIComponent(privateKey)}`;
+      }
+      
+      // Update the URL without triggering a page reload
+      history.replaceState(null, '', `${url.origin}${url.pathname}${url.search}#${newHash}`);
     }
   
     /**

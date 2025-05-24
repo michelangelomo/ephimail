@@ -11,6 +11,10 @@ import (
 	"github.com/michelangelomo/ephimail/internal/redis"
 )
 
+const (
+	reservationEnabled bool = false
+)
+
 // ReservationRequest represents the request to reserve a mailbox
 type ReservationRequest struct {
 	Email     string `json:"email"`
@@ -44,6 +48,11 @@ func (w *WebServer) reserveMailbox(rw http.ResponseWriter, r *http.Request) {
 	// Handle preflight request
 	if r.Method == "OPTIONS" {
 		rw.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if !reservationEnabled {
+		http.Error(rw, "Mailbox reservation is disabled", http.StatusNotImplemented)
 		return
 	}
 
@@ -186,6 +195,11 @@ func (w *WebServer) getReservation(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !reservationEnabled {
+		http.Error(rw, "Mailbox reservation is disabled", http.StatusNotImplemented)
+		return
+	}
+
 	vars := mux.Vars(r)
 	email := vars["email"]
 
@@ -239,6 +253,11 @@ func (w *WebServer) deleteReservation(rw http.ResponseWriter, r *http.Request) {
 	// Handle preflight request
 	if r.Method == "OPTIONS" {
 		rw.WriteHeader(http.StatusOK)
+		return
+	}
+
+	if !reservationEnabled {
+		http.Error(rw, "Mailbox reservation is disabled", http.StatusNotImplemented)
 		return
 	}
 

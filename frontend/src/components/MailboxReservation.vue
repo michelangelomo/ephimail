@@ -3,22 +3,22 @@
     <!-- Show this when no email is selected -->
     <div v-if="!email" class="neo-card info-card">
       <div class="info-header">
-        <i class="fas fa-info-circle"></i>
+        <span>ℹ️</span>
         <h5>Mailbox Features</h5>
       </div>
       <div class="info-content">
         <p>Select an email address to access these features:</p>
         <div class="feature-list">
           <div class="feature-point">
-            <i class="fas fa-lock"></i>
+            <span>🔒</span>
             <span>Reserve a mailbox for private use</span>
           </div>
           <div class="feature-point">
-            <i class="fas fa-shield-alt"></i>
+            <span>🛡️</span>
             <span>Enable end-to-end encryption</span>
           </div>
           <div class="feature-point">
-            <i class="fas fa-clock"></i>
+            <span>⏰</span>
             <span>Automatically delete old emails</span>
           </div>
         </div>
@@ -29,7 +29,7 @@
     <div v-else-if="!reserved" class="reservation-form">
       <div class="form-section">
         <h6 class="section-title">
-          <i class="fas fa-calendar-alt"></i>
+          <span>📅</span>
           Reservation Duration
         </h6>
         <div class="duration-options">
@@ -38,7 +38,7 @@
             <input v-model="duration" :value="option.value" type="radio" name="duration">
             <div class="option-content">
               <div class="option-icon">
-                <i :class="option.icon"></i>
+                <span>{{ option.icon }}</span>
               </div>
               <div class="option-text">
                 <span class="option-label">{{ option.label }}</span>
@@ -56,7 +56,7 @@
             <span class="neo-checkbox-mark"></span>
             <div class="checkbox-content">
               <span class="checkbox-title">
-                <i class="fas fa-lock"></i>
+                <span>🔒</span>
                 Enable End-to-End Encryption
               </span>
               <span class="checkbox-desc">Secure your emails with client-side encryption</span>
@@ -68,7 +68,7 @@
           <div v-if="useEncryption" class="encryption-info">
             <div class="info-box">
               <div class="info-icon">
-                <i class="fas fa-exclamation-triangle"></i>
+                <span>⚠️</span>
               </div>
               <div class="info-text">
                 <h6>About End-to-End Encryption</h6>
@@ -92,7 +92,7 @@
             Processing...
           </span>
           <span v-else class="btn-content">
-            <i class="fas fa-shield-alt"></i>
+            <span>🛡️</span>
             Reserve Mailbox
           </span>
         </button>
@@ -103,7 +103,7 @@
     <div v-else class="reservation-status">
       <div class="status-header">
         <div class="status-icon success">
-          <i class="fas fa-check-circle"></i>
+          <span>✅</span>
         </div>
         <div class="status-text">
           <h6>Mailbox Reserved</h6>
@@ -115,14 +115,14 @@
         <div class="detail-item">
           <span class="detail-label">Status</span>
           <span class="detail-value success">
-            <i class="fas fa-shield-alt"></i>
+            <span>🛡️</span>
             Reserved
           </span>
         </div>
         <div class="detail-item">
           <span class="detail-label">Encryption</span>
           <span class="detail-value" :class="encrypted ? 'success' : 'neutral'">
-            <i :class="encrypted ? 'fas fa-lock' : 'fas fa-unlock'"></i>
+            <span>{{ encrypted ? '🔒' : '🔓' }}</span>
             {{ encrypted ? 'Enabled' : 'Disabled' }}
           </span>
         </div>
@@ -134,29 +134,29 @@
       
       <div v-if="encrypted" class="encryption-warning">
         <div class="warning-header">
-          <i class="fas fa-key"></i>
+          <span>🔑</span>
           <span>Important Security Information</span>
         </div>
         <p>Your unique access URL contains your private key:</p>
         <div class="url-display">
           <input type="text" class="url-input" :value="reservationUrl" readonly>
           <button class="neo-btn copy-btn" @click="copyUrl">
-            <i class="fas fa-copy"></i>
+            <span>📋</span>
           </button>
         </div>
         <div class="security-reminder">
-          <i class="fas fa-exclamation-triangle"></i>
+          <span>⚠️</span>
           <span>Bookmark this URL immediately! It's the only way to decrypt your emails.</span>
         </div>
       </div>
       
       <div class="status-actions">
         <button @click="extendReservation" class="neo-btn neo-btn-secondary">
-          <i class="fas fa-clock"></i>
+          <span>⏰</span>
           Extend Time
         </button>
         <button @click="releaseReservation" class="neo-btn neo-btn-danger">
-          <i class="fas fa-trash"></i>
+          <span>🗑️</span>
           Release
         </button>
       </div>
@@ -192,19 +192,19 @@ export default {
           value: '1h',
           label: '1 Hour',
           description: 'Quick temporary use',
-          icon: 'fas fa-clock'
+          icon: '⏰'
         },
         {
           value: '24h',
           label: '1 Day',
           description: 'Most popular choice',
-          icon: 'fas fa-calendar-day'
+          icon: '📅'
         },
         {
           value: '168h',
           label: '1 Week',
           description: 'Extended protection',
-          icon: 'fas fa-calendar-week'
+          icon: '📊'
         }
       ]
     };

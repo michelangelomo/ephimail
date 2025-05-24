@@ -35,7 +35,7 @@ services:
       - MAIL_PORT=25
       - WEB_ADDRESS=0.0.0.0
       - WEB_PORT=80
-      - ALLOWED_DOMAINS=localhost.local,localhost
+      - ALLOWED_DOMAINS=chevuoida.me
       - EMAIL_TTL=24
       - MAX_RESERVATION_DAYS=7
       - TZ=UTC

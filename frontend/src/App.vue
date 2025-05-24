@@ -71,12 +71,12 @@
               </div>
               
               <div class="header-actions">
-                <button @click="toggleSettings" class="neo-btn neo-btn-secondary settings-btn">
-                  <i class="fas fa-cog"></i>
+                <!--<button @click="toggleSettings" class="neo-btn neo-btn-secondary settings-btn">
+                  <span>⚙️</span>
                   Settings
-                </button>
+                </button>-->
                 <button @click="createNewMailbox" class="neo-btn neo-btn-primary new-btn">
-                  <i class="fas fa-plus"></i>
+                  <span>➕</span>
                   New Mailbox
                 </button>
               </div>
@@ -102,11 +102,11 @@
         <div class="settings-modal" @click.stop>
           <div class="settings-header">
             <h3>
-              <i class="fas fa-cog"></i>
+              <span>⚙️</span>
               Mailbox Settings
             </h3>
             <button @click="closeSettings" class="close-btn">
-              <i class="fas fa-times"></i>
+              <span>✕</span>
             </button>
           </div>
           <div class="settings-content">

@@ -12,9 +12,6 @@
                     @input="handleInput"
                     @focus="handleFocus"
                     @blur="handleBlur">
-                <div class="input-icon" v-if="!isCompact">
-                    <i class="fas fa-user"></i>
-                </div>
             </div>
             
             <div class="separator">
@@ -27,9 +24,6 @@
                         {{ option }}
                     </option>
                 </select>
-                <div class="select-icon">
-                    <i class="fas fa-chevron-down"></i>
-                </div>
             </div>
             
             <button type="submit" 
@@ -40,7 +34,7 @@
                     <div class="neo-spinner"></div>
                 </span>
                 <span v-else class="btn-text">
-                    <i class="fas fa-arrow-right" v-if="isCompact"></i>
+                    <span v-if="isCompact">→</span>
                     <span v-else>Go! 👀</span>
                 </span>
             </button>
@@ -49,7 +43,7 @@
         <!-- Error message -->
         <transition name="error-slide">
             <div v-if="errorMessage" class="error-message">
-                <i class="fas fa-exclamation-triangle"></i>
+                <span>⚠️</span>
                 {{ errorMessage }}
             </div>
         </transition>

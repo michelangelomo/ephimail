@@ -4,17 +4,17 @@
     <div v-if="!passedEmail" class="no-mailbox-state">
       <div class="empty-state-content">
         <div class="empty-state-icon">
-          <i class="fas fa-inbox"></i>
+          <span>📬</span>
         </div>
         <h3>No mailbox selected</h3>
         <p>Enter an email address above to view your inbox</p>
         <div class="quick-tips">
           <div class="tip-item">
-            <i class="fas fa-lightbulb"></i>
+            <span>💡</span>
             <span>Tip: Any email address works instantly</span>
           </div>
           <div class="tip-item">
-            <i class="fas fa-shield-alt"></i>
+            <span>🛡️</span>
             <span>Reserve your mailbox for privacy</span>
           </div>
         </div>
@@ -28,7 +28,7 @@
         <div class="list-header">
           <div class="header-content">
             <h4>
-              <i class="fas fa-inbox"></i>
+              <span>📬</span>
               Inbox
             </h4>
             <div class="email-count" v-if="emails.length > 0">
@@ -37,14 +37,14 @@
           </div>
           <div class="header-actions">
             <button @click="refreshEmails" class="neo-btn neo-btn-sm refresh-btn" :disabled="isLoading">
-              <i class="fas fa-sync-alt" :class="{ 'spinning': isLoading }"></i>
+              <span :class="{ 'spinning': isLoading }">🔄</span>
             </button>
           </div>
         </div>
         
         <!-- Encryption error -->
         <div v-if="encryptionError" class="neo-alert neo-alert-danger">
-          <i class="fas fa-exclamation-triangle"></i>
+          <span>⚠️</span>
           <div>
             <strong>Decryption Error:</strong>
             <p>{{ encryptionError }}</p>
@@ -61,7 +61,7 @@
           
           <div v-else-if="emails.length === 0" class="empty-inbox">
             <div class="empty-inbox-icon">
-              <i class="fas fa-envelope-open"></i>
+              <span>📭</span>
             </div>
             <h5>No emails yet</h5>
             <p>Emails sent to <strong>{{ passedEmail }}</strong> will appear here</p>
@@ -102,8 +102,8 @@
                     {{ formatEmailTime(email.orig_date) }}
                   </div>
                   <div class="email-status">
-                    <i v-if="email.encrypted" class="fas fa-lock" title="Encrypted"></i>
-                    <i v-if="email.unread" class="fas fa-circle unread-indicator" title="Unread"></i>
+                    <span v-if="email.encrypted" title="Encrypted">🔒</span>
+                    <span v-if="email.unread" class="unread-indicator" title="Unread">●</span>
                   </div>
                 </div>
               </div>
@@ -116,12 +116,6 @@
                   {{ getEmailSnippet(email) }}
                 </div>
               </div>
-              
-              <div class="email-actions">
-                <button @click.stop="deleteEmail(email)" class="action-btn delete-btn" title="Delete">
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -132,7 +126,7 @@
         <div v-if="!emailSelected" class="no-email-selected">
           <div class="no-selection-content">
             <div class="no-selection-icon">
-              <i class="fas fa-mouse-pointer"></i>
+              <span>👆</span>
             </div>
             <h4>Select an email to view</h4>
             <p>Choose an email from the list to read its contents</p>
@@ -148,7 +142,7 @@
               </h3>
               <div class="email-badges">
                 <span v-if="currentEmailEncrypted" class="neo-badge neo-badge-success">
-                  <i class="fas fa-lock"></i>
+                  🔒
                   Encrypted
                 </span>
                 <span v-if="selectedEmailData.unread" class="neo-badge neo-badge-primary">
@@ -178,11 +172,11 @@
             
             <div class="email-toolbar">
               <button @click="deleteEmail(selectedEmailData)" class="neo-btn neo-btn-sm neo-btn-danger">
-                <i class="fas fa-trash"></i>
+                <span>🗑️</span>
                 Delete
               </button>
               <button @click="downloadEmail" class="neo-btn neo-btn-sm">
-                <i class="fas fa-download"></i>
+                <span>📥</span>
                 Download
               </button>
             </div>
@@ -603,4 +597,19 @@ ${this.emailContentText}
 
 <style scoped>
 @import '@/assets/css/emailtable.css';
+
+/* Additional styles for custom icons */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.unread-indicator {
+  color: var(--primary);
+  font-size: 0.5rem;
+}
 </style>

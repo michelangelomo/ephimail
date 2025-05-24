@@ -275,11 +275,6 @@
 /* Email preview */
 .email-preview {
     margin-top: 1.5rem;
-    padding: 1.25rem;
-    background: linear-gradient(135deg, rgba(248, 113, 113, 0.05) 0%, rgba(59, 130, 246, 0.05) 100%);
-    border: 2px solid var(--primary);
-    border-radius: 12px;
-    text-align: center;
 }
 
 .preview-label {
@@ -361,7 +356,6 @@
     
     .email-preview {
         margin-top: 1rem;
-        padding: 1rem;
     }
     
     .preview-email {

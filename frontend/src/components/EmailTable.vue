@@ -171,10 +171,10 @@
             </div>
             
             <div class="email-toolbar">
-              <button @click="deleteEmail(selectedEmailData)" class="neo-btn neo-btn-sm neo-btn-danger">
+              <!--<button @click="deleteEmail(selectedEmailData)" class="neo-btn neo-btn-sm neo-btn-danger">
                 <span>🗑️</span>
                 Delete
-              </button>
+              </button>-->
               <button @click="downloadEmail" class="neo-btn neo-btn-sm">
                 <span>📥</span>
                 Download
@@ -250,6 +250,60 @@ export default {
   },
   
   methods: {
+    /**
+     * Parse email address from header value
+     * Handles formats like: "Name <email@domain.com>" or "email@domain.com"
+     * @param {string} headerValue - The raw from header value
+     * @returns {object} Object with name and email properties
+     */
+    parseFromHeader(headerValue) {
+      if (!headerValue || typeof headerValue !== 'string') {
+        return { name: "Unknown Sender", email: "unknown@example.com" };
+      }
+      
+      // Remove any extra whitespace
+      headerValue = headerValue.trim();
+      
+      // Check for format: "Name <email@domain.com>"
+      const nameEmailMatch = headerValue.match(/^(.+?)\s*<(.+?)>$/);
+      if (nameEmailMatch) {
+        const name = nameEmailMatch[1].trim().replace(/^["']|["']$/g, ''); // Remove quotes if present
+        const email = nameEmailMatch[2].trim();
+        return { name, email };
+      }
+      
+      // Check if it's just an email address
+      const emailOnlyMatch = headerValue.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
+      if (emailOnlyMatch) {
+        return { name: headerValue, email: headerValue };
+      }
+      
+      // Fallback
+      return { name: headerValue, email: "unknown@example.com" };
+    },
+
+    /**
+     * Extract from information from email headers
+     * @param {array} headers - Array of header objects
+     * @returns {array} Array with from information in PostalMime format
+     */
+    extractFromHeaders(headers) {
+      if (!headers || !Array.isArray(headers)) {
+        return [{ name: "Unknown Sender", email: "unknown@example.com" }];
+      }
+      
+      const fromHeader = headers.find(header => 
+        header.key && header.key.toLowerCase() === 'from'
+      );
+      
+      if (!fromHeader || !fromHeader.value) {
+        return [{ name: "Unknown Sender", email: "unknown@example.com" }];
+      }
+      
+      const parsed = this.parseFromHeader(fromHeader.value);
+      return [parsed];
+    },
+
     async loadEmails(silent = false) {
       if (!this.passedEmail) {
         this.emails = [];
@@ -289,18 +343,14 @@ export default {
               e.message_id = d.split(":")[1];
             }
             
-            // Ensure required fields exist with proper fallbacks
-            e.from = e.from && Array.isArray(e.from) && e.from.length > 0 
-              ? e.from 
-              : [{ name: "Unknown Sender", email: "unknown@example.com" }];
+            // Fix the from field parsing issue
+            if (!e.from || !Array.isArray(e.from) || e.from.length === 0 || 
+                (e.from[0].name === "Unknown Sender" && e.from[0].email === "unknown@example.com")) {
+              // Extract from information from headers instead
+              e.from = this.extractFromHeaders(e.headers);
+            }
             
-            e.orig_date = e.orig_date || {
-              day: new Date().getDate(),
-              month: new Date().getMonth() + 1,
-              year: new Date().getFullYear(),
-              hour: new Date().getHours(),
-              minute: new Date().getMinutes()
-            };
+            e.orig_date = e.date || new Date();
             
             // PostalMime uses 'text' for the main content, 'body' as fallback
             // Priority: text > body > default message
@@ -314,9 +364,21 @@ export default {
           } catch (parseError) {
             console.error("Failed to parse email:", parseError);
             
+            // Even for unparseable emails, try to extract from header if available
+            let fromInfo = [{ name: "Unknown Sender", email: "unknown@example.com" }];
+            try {
+              // Try to extract headers from the raw email content
+              const headerMatch = emailContent.match(/^From:\s*(.+?)$/m);
+              if (headerMatch) {
+                fromInfo = [this.parseFromHeader(headerMatch[1])];
+              }
+            } catch (headerError) {
+              console.warn("Could not extract from header from unparseable email");
+            }
+            
             parsedEmails.push({
               message_id: d.split(":")[1],
-              from: [{ name: "Unknown Sender", email: "unknown@example.com" }],
+              from: fromInfo,
               subject: "Unparseable Email",
               content: "This email couldn't be parsed properly.",
               text: "This email couldn't be parsed properly.",
@@ -335,11 +397,19 @@ export default {
         
         // Sort emails by date (newest first)
         parsedEmails.sort((a, b) => {
-          const dateA = new Date(a.orig_date.year, a.orig_date.month - 1, a.orig_date.day, a.orig_date.hour, a.orig_date.minute);
-          const dateB = new Date(b.orig_date.year, b.orig_date.month - 1, b.orig_date.day, b.orig_date.hour, b.orig_date.minute);
+          const getDateValue = (origDate) => {
+            if (origDate instanceof Date) return origDate;
+            if (typeof origDate === 'object' && origDate.year) {
+              return new Date(origDate.year, (origDate.month || 1) - 1, origDate.day || 1, origDate.hour || 0, origDate.minute || 0);
+            }
+            return new Date(origDate);
+          };
+          
+          const dateA = getDateValue(a.orig_date);
+          const dateB = getDateValue(b.orig_date);
           return dateB - dateA;
         });
-        
+              
         this.emails = parsedEmails;
         this.isLoading = false;
         
@@ -456,15 +526,30 @@ export default {
     formatEmailTime(origDate) {
       if (!origDate) return '--:--';
       
-      const now = new Date();
-      const emailDate = new Date(
-        origDate.year || now.getFullYear(),
-        (origDate.month || now.getMonth() + 1) - 1,
-        origDate.day || now.getDate(),
-        origDate.hour || 0,
-        origDate.minute || 0
-      );
+      // Handle both Date objects and custom object format
+      let emailDate;
+      if (origDate instanceof Date) {
+        emailDate = origDate;
+      } else if (typeof origDate === 'object' && origDate.year) {
+        // Handle custom object format
+        emailDate = new Date(
+          origDate.year,
+          (origDate.month || 1) - 1, // Convert 1-based month to 0-based
+          origDate.day || 1,
+          origDate.hour || 0,
+          origDate.minute || 0
+        );
+      } else {
+        // Try to parse as string
+        emailDate = new Date(origDate);
+      }
       
+      // Validate the date
+      if (isNaN(emailDate.getTime())) {
+        return '--:--';
+      }
+      
+      const now = new Date();
       const diffMs = now - emailDate;
       const diffMins = Math.floor(diffMs / (1000 * 60));
       const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
@@ -475,17 +560,40 @@ export default {
       if (diffHours < 24) return `${diffHours}h ago`;
       if (diffDays < 7) return `${diffDays}d ago`;
       
-      return `${origDate.day}/${origDate.month}`;
+      return `${emailDate.getDate()}/${emailDate.getMonth() + 1}`;
     },
     
     formatFullDate(origDate) {
       if (!origDate) return 'Date unavailable';
       
-      const day = String(origDate.day || '--').padStart(2, '0');
-      const month = String(origDate.month || '--').padStart(2, '0');
-      const year = origDate.year || '----';
-      const hour = String(origDate.hour || '--').padStart(2, '0');
-      const minute = String(origDate.minute || '--').padStart(2, '0');
+      // Handle both Date objects and custom object format
+      let emailDate;
+      if (origDate instanceof Date) {
+        emailDate = origDate;
+      } else if (typeof origDate === 'object' && origDate.year) {
+        // Handle custom object format
+        emailDate = new Date(
+          origDate.year,
+          (origDate.month || 1) - 1, // Convert 1-based month to 0-based
+          origDate.day || 1,
+          origDate.hour || 0,
+          origDate.minute || 0
+        );
+      } else {
+        // Try to parse as string
+        emailDate = new Date(origDate);
+      }
+      
+      // Validate the date
+      if (isNaN(emailDate.getTime())) {
+        return 'Date unavailable';
+      }
+      
+      const day = String(emailDate.getDate()).padStart(2, '0');
+      const month = String(emailDate.getMonth() + 1).padStart(2, '0');
+      const year = emailDate.getFullYear();
+      const hour = String(emailDate.getHours()).padStart(2, '0');
+      const minute = String(emailDate.getMinutes()).padStart(2, '0');
       
       return `${day}/${month}/${year} ${hour}:${minute}`;
     },
@@ -597,19 +705,4 @@ ${this.emailContentText}
 
 <style scoped>
 @import '@/assets/css/emailtable.css';
-
-/* Additional styles for custom icons */
-.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.unread-indicator {
-  color: var(--primary);
-  font-size: 0.5rem;
-}
 </style>

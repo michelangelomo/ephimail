@@ -889,3 +889,40 @@
     border-width: 4px;
   }
 }
+
+.email-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-start; /* Default for mobile */
+}
+
+/* Desktop and larger tablets - move download to the right */
+@media (min-width: 1024px) {
+  .email-toolbar {
+    justify-content: flex-end; /* Move buttons to the right on desktop */
+  }
+}
+
+/* Tablet landscape and small desktop */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .email-toolbar {
+    justify-content: flex-end; /* Also move to right on tablets */
+  }
+}
+
+/* Ensure download button has proper styling */
+.download-btn {
+  margin-left: auto; /* Push to the right when flexbox allows */
+}
+
+/* Mobile - keep buttons centered/left aligned */
+@media (max-width: 767px) {
+  .email-toolbar {
+    justify-content: center; /* Center on mobile for better UX */
+  }
+  
+  .download-btn {
+    margin-left: 0; /* Reset margin on mobile */
+  }
+}

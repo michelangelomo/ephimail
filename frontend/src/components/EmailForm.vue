@@ -62,6 +62,7 @@
 
 <script>
 import EncryptionService from '../services/encryption';
+import configService from '../services/config';
 
 export default {
     props: {
@@ -81,6 +82,7 @@ export default {
             hasError: false,
             errorMessage: '',
             isFocused: false,
+            backendUrl: '',
             reg: /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
         };
     },
@@ -96,7 +98,10 @@ export default {
         }
     },
     
-    mounted() {
+    async mounted() {
+        // Get backend URL from config service
+        this.backendUrl = configService.getBackendUrl();
+        
         this.fetchSelectOptions();
         this.generateName();
         this.extractPathFromURL();
@@ -167,7 +172,7 @@ export default {
         
         async fetchSelectOptions() {
             try {
-                const response = await fetch(`${process.env.VUE_APP_BACKEND_URL}/domains`);
+                const response = await fetch(`${this.backendUrl}/domains`);
                 
                 if (!response.ok) {
                     throw new Error('Failed to fetch domains');

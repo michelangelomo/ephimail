@@ -1,3 +1,4 @@
+// server/web.go
 package server
 
 import (
@@ -10,17 +11,18 @@ import (
 )
 
 type WebServer struct {
-	Address string
-	Port    int
-
-	storage redis.Storage
-	domains []string
+	Address    string
+	Port       int
+	storage    redis.Storage
+	domains    []string
+	corsConfig *CORSConfig
 }
 
 func NewWebServer(storage redis.Storage, domains []string) *WebServer {
 	return &WebServer{
-		storage: storage,
-		domains: domains,
+		storage:    storage,
+		domains:    domains,
+		corsConfig: NewCORSConfig(),
 	}
 }
 
@@ -31,9 +33,12 @@ func (w *WebServer) SetAllowedDomains(domains []string) {
 func (w *WebServer) Run() error {
 	m := mux.NewRouter()
 
+	// Apply CORS middleware to all routes
+	m.Use(w.corsConfig.CORSMiddleware)
+
 	// Register API routes
 	m.HandleFunc("/domains", func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
 		json.NewEncoder(rw).Encode(w.domains)
 	})
@@ -48,7 +53,7 @@ func (w *WebServer) Run() error {
 			return
 		}
 
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
 		json.NewEncoder(rw).Encode(emails)
 	})

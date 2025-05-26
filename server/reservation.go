@@ -40,17 +40,6 @@ func (w *WebServer) RegisterReservationHandlers(router *mux.Router) {
 
 // reserveMailbox handles the reservation of a mailbox
 func (w *WebServer) reserveMailbox(rw http.ResponseWriter, r *http.Request) {
-	// Enable CORS
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
-	rw.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-	rw.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-	// Handle preflight request
-	if r.Method == "OPTIONS" {
-		rw.WriteHeader(http.StatusOK)
-		return
-	}
-
 	if !reservationEnabled {
 		http.Error(rw, "Mailbox reservation is disabled", http.StatusNotImplemented)
 		return
@@ -185,16 +174,6 @@ func (w *WebServer) isMailboxReserved(email string) (bool, error) {
 
 // getReservation handles getting a mailbox reservation
 func (w *WebServer) getReservation(rw http.ResponseWriter, r *http.Request) {
-	// Enable CORS
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
-	rw.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
-
-	// Handle preflight request
-	if r.Method == "OPTIONS" {
-		rw.WriteHeader(http.StatusOK)
-		return
-	}
-
 	if !reservationEnabled {
 		http.Error(rw, "Mailbox reservation is disabled", http.StatusNotImplemented)
 		return
@@ -246,16 +225,6 @@ func (w *WebServer) getReservation(rw http.ResponseWriter, r *http.Request) {
 
 // deleteReservation handles deleting a mailbox reservation
 func (w *WebServer) deleteReservation(rw http.ResponseWriter, r *http.Request) {
-	// Enable CORS
-	rw.Header().Set("Access-Control-Allow-Origin", "*")
-	rw.Header().Set("Access-Control-Allow-Methods", "DELETE, OPTIONS")
-
-	// Handle preflight request
-	if r.Method == "OPTIONS" {
-		rw.WriteHeader(http.StatusOK)
-		return
-	}
-
 	if !reservationEnabled {
 		http.Error(rw, "Mailbox reservation is disabled", http.StatusNotImplemented)
 		return

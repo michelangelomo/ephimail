@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/mux"
 	"github.com/michelangelomo/ephimail/internal/redis"
@@ -32,14 +33,37 @@ func (w *WebServerWithWebSocket) Run() error {
 	// Create router
 	m := mux.NewRouter()
 
+	// Apply CORS middleware to all routes
+	m.Use(w.corsConfig.CORSMiddleware)
+
 	// Add WebSocket endpoint
 	m.HandleFunc("/ws", func(rw http.ResponseWriter, r *http.Request) {
 		ServeWs(w.wsHub, rw, r)
 	})
 
+	// Config endpoint for frontend runtime configuration
+	m.HandleFunc("/api/config", func(rw http.ResponseWriter, r *http.Request) {
+		config := map[string]interface{}{
+			"backendUrl": os.Getenv("BACKEND_URL"),
+		}
+
+		// If BACKEND_URL is not set, use the request's origin
+		if config["backendUrl"] == nil || config["backendUrl"] == "" {
+			scheme := "http"
+			if r.TLS != nil {
+				scheme = "https"
+			}
+			config["backendUrl"] = fmt.Sprintf("%s://%s", scheme, r.Host)
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusOK)
+		json.NewEncoder(rw).Encode(config)
+	})
+
 	// Add existing endpoints
 	m.HandleFunc("/domains", func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
 		json.NewEncoder(rw).Encode(w.domains)
 	})
@@ -53,7 +77,7 @@ func (w *WebServerWithWebSocket) Run() error {
 			return
 		}
 
-		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusOK)
 		json.NewEncoder(rw).Encode(emails)
 	})

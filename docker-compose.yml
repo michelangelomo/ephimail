@@ -13,7 +13,7 @@ services:
     volumes:
       - ./frontend:/app
     environment:
-      - VUE_APP_BACKEND_URL=http://localhost:8080
+      - VUE_APP_BACKEND_URL=${BACKEND_URL:-http://localhost:8080}
     ports:
       - 8081:8080
 
@@ -41,6 +41,7 @@ services:
       - EMAIL_TTL=24
       - MAX_RESERVATION_DAYS=7
       - TZ=UTC
+      - APP_URL=${APP_URL:-http://localhost:8081}  # Frontend URL for CORS
 
 networks:
   ephimail-network:

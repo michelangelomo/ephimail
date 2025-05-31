@@ -59,10 +59,16 @@
               <!-- Email preview when inbox is selected -->
               <div class="current-mailbox-preview" v-if="email">
                 <div class="preview-label">Your temporary mailbox:</div>
-                <div class="preview-email">
-                  <span class="preview-username">{{ email.split('@')[0] }}</span>
-                  <span class="preview-at">@</span>
-                  <span class="preview-domain">{{ email.split('@')[1] }}</span>
+                <div class="preview-email-container">
+                  <div class="preview-email">
+                    <span class="preview-username">{{ email.split('@')[0] }}</span>
+                    <span class="preview-at">@</span>
+                    <span class="preview-domain">{{ email.split('@')[1] }}</span>
+                  </div>
+                  <button @click="copyEmailAddress" class="copy-email-btn" title="Copy email address">
+                    <span v-if="!copied">📋</span>
+                    <span v-else>✅</span>
+                  </button>
                 </div>
               </div>
               
@@ -147,6 +153,7 @@ export default {
       isAnimating: false,
       showSettings: false,
       isReserved: false,
+      copied: false,
       howItWorksSteps: [
         {
           title: 'Choose an address',
@@ -177,6 +184,73 @@ export default {
       }, 500);
     },
     
+    async copyEmailAddress() {
+      if (!this.email) return;
+      
+      try {
+        await navigator.clipboard.writeText(this.email);
+        this.copied = true;
+        
+        this.$notify({
+          title: 'Copied!',
+          text: `Email address ${this.email} copied to clipboard`,
+          type: 'success',
+          duration: 3000
+        });
+        
+        // Reset the checkmark after 2 seconds
+        setTimeout(() => {
+          this.copied = false;
+        }, 2000);
+        
+      } catch (error) {
+        console.error('Failed to copy email address:', error);
+        
+        // Fallback for older browsers
+        this.fallbackCopyTextToClipboard(this.email);
+      }
+    },
+    
+    fallbackCopyTextToClipboard(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.top = '0';
+      textArea.style.left = '0';
+      textArea.style.position = 'fixed';
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          this.copied = true;
+          this.$notify({
+            title: 'Copied!',
+            text: `Email address ${this.email} copied to clipboard`,
+            type: 'success',
+            duration: 3000
+          });
+          
+          setTimeout(() => {
+            this.copied = false;
+          }, 2000);
+        } else {
+          throw new Error('execCommand failed');
+        }
+      } catch (err) {
+        this.$notify({
+          title: 'Copy Failed',
+          text: 'Could not copy email address to clipboard',
+          type: 'error',
+          duration: 5000
+        });
+      }
+      
+      document.body.removeChild(textArea);
+    },
+    
     toggleSettings() {
       if (!this.email) return;
       this.showSettings = !this.showSettings;
@@ -192,6 +266,7 @@ export default {
       this.isMinimized = false;
       this.showSettings = false;
       this.isReserved = false;
+      this.copied = false;
       
       // Clear URL hash properly without causing page reload
       history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -209,4 +284,65 @@ export default {
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import '@/assets/css/NeoBrutalism.css';
 @import '@/assets/css/app.css';
+
+/* Copy button styles */
+.preview-email-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.copy-email-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--text);
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  backdrop-filter: blur(10px);
+  box-shadow: 2px 2px 0 var(--shadow-color);
+}
+
+.copy-email-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 var(--shadow-color);
+}
+
+.copy-email-btn:active {
+  transform: translateY(0);
+  box-shadow: 1px 1px 0 var(--shadow-color);
+}
+
+.copy-email-btn:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .preview-email-container {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  
+  .copy-email-btn {
+    width: 100%;
+    max-width: 200px;
+  }
+}
+
+@media (max-width: 480px) {
+  .copy-email-btn {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+  }
+}
 </style>

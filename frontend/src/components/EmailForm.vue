@@ -51,10 +51,16 @@
         <!-- Preview (only in large mode) -->
         <div v-if="!isCompact && (email || emailGenerated)" class="email-preview">
             <div class="preview-label">Your temporary email:</div>
-            <div class="preview-email">
-                <span class="preview-username">{{ email || emailGenerated }}</span>
-                <span class="preview-at">@</span>
-                <span class="preview-domain">{{ selectedOption }}</span>
+            <div class="preview-container">
+                <div class="preview-email">
+                    <span class="preview-username">{{ email || emailGenerated }}</span>
+                    <span class="preview-at">@</span>
+                    <span class="preview-domain">{{ selectedOption }}</span>
+                </div>
+                <button type="button" @click="copyPreviewEmail" class="preview-copy-btn" title="Copy email address">
+                    <span v-if="!previewCopied">📋</span>
+                    <span v-else>✅</span>
+                </button>
             </div>
         </div>
     </form>
@@ -83,6 +89,7 @@ export default {
             errorMessage: '',
             isFocused: false,
             backendUrl: '',
+            previewCopied: false,
             reg: /^(([^<>()\]\\.,;:\s@"]+(\.[^<>()\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,24}))$/
         };
     },
@@ -108,6 +115,73 @@ export default {
     },
     
     methods: {
+        async copyPreviewEmail() {
+            const emailToCopy = this.fullEmail;
+            
+            try {
+                await navigator.clipboard.writeText(emailToCopy);
+                this.previewCopied = true;
+                
+                this.$notify({
+                    title: 'Copied!',
+                    text: `Email address ${emailToCopy} copied to clipboard`,
+                    type: 'success',
+                    duration: 3000
+                });
+                
+                // Reset the checkmark after 2 seconds
+                setTimeout(() => {
+                    this.previewCopied = false;
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Failed to copy email address:', error);
+                
+                // Fallback for older browsers
+                this.fallbackCopyTextToClipboard(emailToCopy);
+            }
+        },
+        
+        fallbackCopyTextToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            textArea.style.position = 'fixed';
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    this.previewCopied = true;
+                    this.$notify({
+                        title: 'Copied!',
+                        text: `Email address ${text} copied to clipboard`,
+                        type: 'success',
+                        duration: 3000
+                    });
+                    
+                    setTimeout(() => {
+                        this.previewCopied = false;
+                    }, 2000);
+                } else {
+                    throw new Error('execCommand failed');
+                }
+            } catch (err) {
+                this.$notify({
+                    title: 'Copy Failed',
+                    text: 'Could not copy email address to clipboard',
+                    type: 'error',
+                    duration: 5000
+                });
+            }
+            
+            document.body.removeChild(textArea);
+        },
+        
         extractPathFromURL() {
             // Use the new encryption service method
             const extractedEmail = EncryptionService.getEmailFromUrl();
@@ -259,4 +333,68 @@ export default {
 
 <style scoped>
 @import '@/assets/css/emailform.css';
+
+/* Preview container styles */
+.preview-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.preview-copy-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--text);
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  backdrop-filter: blur(10px);
+  box-shadow: 2px 2px 0 var(--shadow-color);
+  flex-shrink: 0;
+}
+
+.preview-copy-btn:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 var(--shadow-color);
+}
+
+.preview-copy-btn:active {
+  transform: translateY(0);
+  box-shadow: 1px 1px 0 var(--shadow-color);
+}
+
+.preview-copy-btn:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .preview-container {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .preview-copy-btn {
+    align-self: center;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 480px) {
+  .preview-copy-btn {
+    padding: 0.75rem;
+    font-size: 0.85rem;
+  }
+}
 </style>
